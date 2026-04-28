@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
+import com.zhice.common.context.UserContext;
 import java.util.List;
 
 /**
@@ -22,10 +22,17 @@ public class ProjectController {
     @Autowired
     private ProjectService projectService; // 假设 Service 层已实现基础的 CRUD
 
+
     @GetMapping
     @Operation(summary = "获取当前用户的项目列表", description = "返回当前登录用户参与的所有项目（含创建和加入的）")
     public Result<List<Project>> listProjects() {
-        // TODO: 结合鉴权上下文获取当前用户ID，再查询关联项目
+        // 直接从上下文中优雅地获取用户ID，无需在接口传参
+        Long currentUserId = UserContext.getUserId();
+
+        // TODO: 结合 zc_project_member 表查询关联项目 (下个阶段完善多表联查)
+        // 暂且打印出来以验证鉴权是否成功
+        System.out.println("====== 当前发起请求的用户ID是: " + currentUserId + " ======");
+
         List<Project> list = projectService.list();
         return Result.success(list);
     }

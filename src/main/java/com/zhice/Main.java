@@ -1,17 +1,20 @@
 package com.zhice;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+/**
+ * 智策平台后端启动类
+ */
+@SpringBootApplication
+@MapperScan("com.zhice.**.mapper") // 扫描所有模块下的 mapper 接口
 public class Main {
     public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
-
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
-        }
+        SpringApplication.run(Main.class, args);
+        System.out.println("==================================================");
+        System.out.println("====== 智策平台后端启动成功 (Java 20 环境) ======");
+        System.out.println("====== Swagger 接口文档地址: http://localhost:8080/swagger-ui/index.html ======");
+        System.out.println("==================================================");
     }
 }

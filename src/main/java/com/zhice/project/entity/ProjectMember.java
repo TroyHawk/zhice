@@ -7,28 +7,38 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 项目团队成员映射实体 (打通用户与项目的关系)
+ * 项目成员关联实体类
  */
 @Data
 @TableName("zc_project_member")
-@Schema(description = "项目团队成员关联表")
+@Schema(description = "项目成员及角色信息")
 public class ProjectMember {
 
     @TableId(type = IdType.AUTO)
+    @Schema(description = "关联记录唯一ID")
     private Long id;
 
-    @Schema(description = "关联的项目ID", example = "1001")
+    @Schema(description = "项目ID", example = "1001")
     private Long projectId;
 
-    @Schema(description = "关联的用户ID", example = "501")
+    @Schema(description = "用户ID", example = "2023001")
     private Long userId;
 
-    @Schema(description = "团队角色：1-组长/项目负责人, 2-核心成员, 3-指导老师", example = "2")
-    private Integer roleType;
+    @Schema(description = "团队角色：1-组长, 2-成员, 3-指导老师", example = "1")
+    private Integer role;
 
-    @Schema(description = "具体分工（如：前端开发、文档撰写、PPT制作等）")
-    private String taskRole;
+    @Schema(description = "加入时间")
+    private LocalDateTime joinTime;
 
     @TableField(fill = FieldFill.INSERT)
-    private LocalDateTime joinTime;
+    @Schema(description = "记录创建时间")
+    private LocalDateTime createTime;
+
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @Schema(description = "记录更新时间")
+    private LocalDateTime updateTime;
+
+    @TableLogic
+    @Schema(description = "逻辑删除标志")
+    private Integer deleted;
 }
