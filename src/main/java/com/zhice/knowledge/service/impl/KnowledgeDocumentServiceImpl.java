@@ -4,9 +4,13 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhice.knowledge.entity.KnowledgeDocument;
 import com.zhice.knowledge.mapper.KnowledgeDocumentMapper;
 import com.zhice.knowledge.service.KnowledgeDocumentService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import com.zhice.knowledge.service.KnowledgeParsingService;
+import org.springframework.context.annotation.Lazy;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +21,11 @@ public class KnowledgeDocumentServiceImpl extends ServiceImpl<KnowledgeDocumentM
 
     // 暂时将文件存储在项目根目录下的 uploads 文件夹中
     private static final String UPLOAD_DIR = System.getProperty("user.dir") + File.separator + "uploads" + File.separator + "knowledge";
+
+
+    @Autowired
+    @Lazy // 使用 Lazy 防止循环依赖
+    private KnowledgeParsingService parsingService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -64,9 +73,9 @@ public class KnowledgeDocumentServiceImpl extends ServiceImpl<KnowledgeDocumentM
         document.setFileSize(file.getSize());
         document.setFilePath(destFile.getAbsolutePath());
         document.setStatus(0); // 0-未解析 (等待下一阶段切片和向量化)
-
         this.save(document);
 
+        parsingService.parseAndVectorizeAsync(document);
         return document;
     }
 }

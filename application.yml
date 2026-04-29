@@ -5,15 +5,17 @@ spring:
     password: lusini123
     driver-class-name: com.mysql.cj.jdbc.Driver
   ai:
-    deepseek:
-      # 请替换为你自己的 API Key (如果是国内模型代理，填国内的Key)
-      api-key: sk-711e0c82b50343d5928facd78d62e08f
-      # 默认是 https://api.openai.com，如果是国内模型(如DeepSeek/通义千问代理)，请修改此处
-      base-url: https://api.deepseek.com
+    openai:
+      api-key: sk-a2d6d343a85f45c99deb74062b223100
+      # 阿里云百炼
+      base-url: https://dashscope.aliyuncs.com/compatible-mode
+      chat:
+        options:
+          model: qwen3.6-flash
       embedding:
         options:
-          # 使用向量化模型
-          model: text-embedding-3-small
+          # 向量化指定使用国内开源的中文向量模型
+          model: text-embedding-v3
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true # 开启驼峰命名转换
