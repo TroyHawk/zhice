@@ -40,5 +40,5 @@ public class Project {
 
     @TableLogic
     @Schema(description = "逻辑删除标志")
-    private Integer deleted;
+    private Integer deleted = 0;
 }

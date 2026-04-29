@@ -33,15 +33,21 @@ public class ProjectController {
         // 暂且打印出来以验证鉴权是否成功
         System.out.println("====== 当前发起请求的用户ID是: " + currentUserId + " ======");
 
-        List<Project> list = projectService.list();
+        List<Project> list = projectService.findUserProjects(currentUserId);
         return Result.success(list);
     }
 
     @PostMapping
-    @Operation(summary = "创建新项目空间", description = "组长或发起人创建一个新的竞赛项目")
+    @Operation(summary = "创建新项目空间", description = "创建一个新的竞赛项目，并自动将当前登录用户绑定为该项目的组长")
     public Result<Project> createProject(@RequestBody Project project) {
-        projectService.save(project);
-        return Result.success(project);
+        // 1. 从上下文中优雅获取当前用户 ID (由 AuthInterceptor 拦截器解析注入)
+        Long currentUserId = UserContext.getUserId();
+
+        // 2. 调用 Service 层包含事务的创建逻辑
+        Project createdProject = projectService.createProjectWithLeader(project, currentUserId);
+
+        // 3. 返回成功结果
+        return Result.success(createdProject);
     }
 
     @GetMapping("/{id}")
