@@ -1,6 +1,7 @@
 package com.zhice.project.controller;
 
 import com.zhice.common.api.Result;
+import com.zhice.project.dto.MemberInviteDTO;
 import com.zhice.project.entity.Project;
 import com.zhice.project.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -59,5 +60,20 @@ public class ProjectController {
             return Result.error(404, "项目不存在");
         }
         return Result.success(project);
+    }
+
+    @PostMapping("/{id}/members")
+    @Operation(summary = "邀请成员加入", description = "仅项目组长可调用，通过学号邀请新成员")
+    public Result<String> inviteMember(
+            @Parameter(description = "项目ID", required = true) @PathVariable Long id,
+            @RequestBody MemberInviteDTO dto) {
+
+        // 获取当前操作人ID
+        Long currentUserId = UserContext.getUserId();
+
+        // 调用 Service，任何不合法情况都会抛出异常被 GlobalExceptionHandler 拦截
+        projectService.inviteMember(id, currentUserId, dto.getUsername(), dto.getRole());
+
+        return Result.success("邀请成功");
     }
 }

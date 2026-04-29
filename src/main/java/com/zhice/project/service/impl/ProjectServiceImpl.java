@@ -1,11 +1,14 @@
 package com.zhice.project.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhice.project.entity.Project;
 import com.zhice.project.entity.ProjectMember;
 import com.zhice.project.mapper.ProjectMapper;
 import com.zhice.project.service.ProjectService;
 import com.zhice.project.mapper.ProjectMemberMapper;
+import com.zhice.user.entity.User;
+import com.zhice.user.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +24,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
 
     @Autowired
     private ProjectMemberMapper projectMemberMapper;
+
+    @Autowired
+    private UserMapper userMapper; // 新增注入，用于校验目标用户
 
     @Override
     public List<Project> findUserProjects(Long userId) {
@@ -48,5 +54,52 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
 
         // 4. 返回包含最新ID的项目对象
         return project;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void inviteMember(Long projectId, Long currentUserId, String targetUsername, Integer role) {
+
+        // 1. 越权校验：查出当前操作者在项目中的身份
+        ProjectMember inviter = projectMemberMapper.selectOne(
+                new LambdaQueryWrapper<ProjectMember>()
+                        .eq(ProjectMember::getProjectId, projectId)
+                        .eq(ProjectMember::getUserId, currentUserId)
+        );
+
+        if (inviter == null) {
+            throw new IllegalArgumentException("无权限：您不是该项目的成员");
+        }
+        if (inviter.getRole() != 1) {
+            throw new IllegalArgumentException("无权限：只有项目组长可以邀请新成员");
+        }
+
+        // 2. 目标存在性校验：根据用户名查目标用户
+        User targetUser = userMapper.selectOne(
+                new LambdaQueryWrapper<User>().eq(User::getUsername, targetUsername)
+        );
+        if (targetUser == null) {
+            throw new IllegalArgumentException("目标用户不存在，请检查学号/教工号输入是否正确");
+        }
+
+        // 3. 防重复校验：目标用户是否已经在项目中了
+        Long existCount = projectMemberMapper.selectCount(
+                new LambdaQueryWrapper<ProjectMember>()
+                        .eq(ProjectMember::getProjectId, projectId)
+                        .eq(ProjectMember::getUserId, targetUser.getId())
+        );
+        if (existCount > 0) {
+            throw new IllegalArgumentException("该用户已经是团队成员，无需重复邀请");
+        }
+
+        // 4. 全部校验通过，执行插入逻辑
+        ProjectMember newMember = new ProjectMember();
+        newMember.setProjectId(projectId);
+        newMember.setUserId(targetUser.getId());
+        // 默认赋予核心成员身份
+        newMember.setRole(role != null ? role : 2);
+        newMember.setJoinTime(LocalDateTime.now());
+
+        projectMemberMapper.insert(newMember);
     }
 }
