@@ -3,41 +3,40 @@ package com.zhice.task.entity;
 import com.baomidou.mybatisplus.annotation.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-
 import java.time.LocalDateTime;
 
-/**
- * 敏捷任务看板实体类
- */
 @Data
 @TableName("zc_task")
 @Schema(description = "敏捷任务实体")
 public class Task {
 
     @TableId(type = IdType.AUTO)
-    @Schema(description = "任务唯一ID")
+    @Schema(description = "主键ID")
     private Long id;
 
-    @Schema(description = "所属项目ID", example = "1001")
+    @Schema(description = "所属项目ID")
     private Long projectId;
 
-    @Schema(description = "任务标题", example = "完成4C大赛平台原型设计")
+    @Schema(description = "任务标题")
     private String title;
 
-    @Schema(description = "任务详情描述/要求")
+    @Schema(description = "任务详细描述")
     private String description;
 
-    @Schema(description = "负责人(成员)ID", example = "501")
-    private Long assigneeId;
-
-    @Schema(description = "任务状态: 0-TODO(待办), 1-DOING(进行中), 2-DONE(已完成)", example = "0")
+    @Schema(description = "状态: 0-待处理, 1-进行中, 2-审核中, 3-已完成", example = "0")
     private Integer status;
 
-    @Schema(description = "任务优先级: 1-低, 2-中, 3-高", example = "3")
+    @Schema(description = "优先级: 0-低, 1-中, 2-高", example = "1")
     private Integer priority;
 
-    @Schema(description = "截止日期（针对竞赛节点）")
-    private LocalDateTime dueDate;
+    @Schema(description = "创建人ID")
+    private Long creatorId;
+
+    @Schema(description = "被指派的负责人ID")
+    private Long assigneeId;
+
+    @Schema(description = "截止时间")
+    private LocalDateTime deadline;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
@@ -46,5 +45,6 @@ public class Task {
     private LocalDateTime updateTime;
 
     @TableLogic
+    @TableField(select = false) // 查询时不返回这个字段
     private Integer deleted;
 }

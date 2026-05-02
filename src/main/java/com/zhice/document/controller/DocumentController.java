@@ -1,47 +1,64 @@
 package com.zhice.document.controller;
 
+import com.zhice.common.api.Result;
+import com.zhice.common.context.UserContext;
+import com.zhice.document.dto.IterateDTO;
+import com.zhice.document.entity.ProjectDraft;
 import com.zhice.document.service.DocumentService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 @RestController
 @RequestMapping("/api/v1/documents")
-@Tag(name = "文档成果生成", description = "AI 辅助一键生成并导出符合赛事规范的 Word 文档")
+@Tag(name = "成果生成中心", description = "AI 协同申报书生成与导出")
 public class DocumentController {
 
     @Autowired
     private DocumentService documentService;
 
-    @GetMapping("/export/4c/{projectId}")
-    @Operation(summary = "一键生成 4C 大赛说明书", description = "基于项目数据和AI分析，直接下载标准 Word 文档")
-    public void export4CDocument(
-            @Parameter(description = "项目唯一ID", required = true) @PathVariable Long projectId,
-            HttpServletResponse response) throws IOException {
+    @PostMapping("/{projectId}/generate-initial")
+    @Operation(summary = "1. 初次生成草稿", description = "读取项目的AI智库资料，一键生成初稿")
+    public Result<String> generateInitial(@PathVariable Long projectId) {
+        return Result.success(documentService.generateInitialContent(projectId));
+    }
 
-        // 获取生成的 Word 字节流
-        byte[] wordBytes = documentService.generate4cDocument(projectId);
+    @PostMapping("/{projectId}/iterate")
+    @Operation(summary = "2. 对话式微调", description = "输入修改要求，AI重写内容")
+    public Result<String> iterate(@PathVariable Long projectId, @RequestBody IterateDTO dto) {
+        return Result.success(documentService.iterateContent(projectId, dto.getOldContent(), dto.getUserPrompt()));
+    }
 
-        // 设置标准的文件下载请求头 (MIME Type 对应 docx)
-        response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-        response.setCharacterEncoding("utf-8");
+    @PostMapping("/drafts")
+    @Operation(summary = "3. 保存版本", description = "将满意的 JSON 文本存入数据库")
+    public Result<Long> saveDraft(@RequestBody ProjectDraft draft) {
+        draft.setCreatorId(UserContext.getUserId());
+        documentService.saveDraft(draft);
+        // 返回刚插入数据库自动生成的自增 ID，极大方便测试
+        return Result.success(draft.getId());
+    }
 
-        // 对文件名进行 URL 编码，防止中文字符在部分浏览器中变成乱码
-        String fileName = URLEncoder.encode("4C大赛作品说明书_初稿.docx", StandardCharsets.UTF_8.toString()).replaceAll("\\+", "%20");
-        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName);
-
-        // 写入输出流返回给前端
-        try (OutputStream os = response.getOutputStream()) {
-            os.write(wordBytes);
-            os.flush();
+    @GetMapping("/{draftId}/export")
+    @Operation(summary = "4. 导出定稿Word", description = "将指定的草稿渲染进Word模板并下载")
+    public void export(@PathVariable Long draftId, HttpServletResponse response) {
+        try {
+            response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+            String fileName = URLEncoder.encode("申报书定稿.docx", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
+            response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName);
+            documentService.exportDraftToWord(draftId, response.getOutputStream());
+        } catch (Exception e) {
+            response.reset();
+            response.setContentType("application/json;charset=utf-8");
+            try {
+                response.getWriter().println("{\"code\":500,\"message\":\"导出失败：" + e.getMessage() + "\"}");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 }
