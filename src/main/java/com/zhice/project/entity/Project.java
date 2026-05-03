@@ -24,7 +24,7 @@ public class Project {
     @Schema(description = "项目简介/描述")
     private String description;
 
-    @Schema(description = "竞赛类型：1-大创, 2-互联网+, 3-挑战杯, 4-4C大赛等", example = "4")
+    @Schema(description = "竞赛类型：1-大创, 2-互联网+, 3-挑战杯, 4-中国大学生应用设计大赛， 5-其他", example = "4")
     private Integer competitionType;
 
     @Schema(description = "项目状态：0-筹备中, 1-进行中, 2-已结题", example = "1")
@@ -41,4 +41,11 @@ public class Project {
     @TableLogic
     @Schema(description = "逻辑删除标志")
     private Integer deleted = 0;
+
+
+    // 用于接收当前用户在该项目中的身份角色
+    @TableField(exist = false)
+    @Schema(description = "当前用户在项目中的角色：1-组长, 2-普通成员, 3-指导老师")
+    private Integer role;
+
 }

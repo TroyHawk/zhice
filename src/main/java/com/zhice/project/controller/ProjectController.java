@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.zhice.common.context.UserContext;
 import java.util.List;
+import com.zhice.project.vo.ProjectMemberVO;
 
 /**
  * 项目空间前台控制器
@@ -62,7 +63,7 @@ public class ProjectController {
         return Result.success(project);
     }
 
-    @PostMapping("/{id}/members")
+    @PostMapping("/{id}/members/invite")
     @Operation(summary = "邀请成员加入", description = "仅项目组长可调用，通过学号邀请新成员")
     public Result<String> inviteMember(
             @Parameter(description = "项目ID", required = true) @PathVariable Long id,
@@ -75,5 +76,29 @@ public class ProjectController {
         projectService.inviteMember(id, currentUserId, dto.getUsername(), dto.getRole());
 
         return Result.success("邀请成功");
+    }
+
+    @GetMapping("/{id}/members")
+    @Operation(summary = "获取项目成员列表", description = "获取当前项目下的所有成员详细信息")
+    public Result<List<ProjectMemberVO>> getProjectMembers(@PathVariable Long id) {
+        List<ProjectMemberVO> members = projectService.getProjectMembers(id);
+        return Result.success(members);
+    }
+
+    @PutMapping
+    @Operation(summary = "更新项目信息", description = "修改项目的名称、描述、竞赛赛道等基本信息")
+    public Result<String> updateProject(@RequestBody Project project) {
+        if (project.getId() == null) {
+            return Result.error(600, "项目不存在");
+        }
+        projectService.updateProject(project);
+        return Result.success("项目更新成功");
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "删除项目", description = "彻底删除该项目及关联的所有成员信息")
+    public Result<String> deleteProject(@PathVariable Long id) {
+        projectService.deleteProject(id);
+        return Result.success("项目删除成功");
     }
 }

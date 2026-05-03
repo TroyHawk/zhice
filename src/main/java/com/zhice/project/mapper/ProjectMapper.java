@@ -20,8 +20,10 @@ public interface ProjectMapper extends BaseMapper<Project> {
      * 根据用户ID查询其参与的所有项目
      * 涉及 zc_project (p) 和 zc_project_member (pm) 的联表查询
      */
-    @Select("SELECT p.* FROM zc_project p " +
+    @Select("SELECT p.*, pm.role " +   // 重点：把 pm.role 也查出来映射到实体类
+            "FROM zc_project p " +
             "INNER JOIN zc_project_member pm ON p.id = pm.project_id " +
-            "WHERE pm.user_id = #{userId} AND p.deleted = 0 AND pm.deleted = 0")
+            "WHERE pm.user_id = #{userId} AND p.deleted = 0 AND pm.deleted = 0 " +
+            "ORDER BY p.create_time DESC") // 重点：新项目排在前面
     List<Project> selectProjectsByUserId(@Param("userId") Long userId);
 }

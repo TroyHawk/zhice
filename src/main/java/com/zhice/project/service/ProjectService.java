@@ -2,6 +2,7 @@ package com.zhice.project.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zhice.project.entity.Project;
+import com.zhice.project.vo.ProjectMemberVO;
 
 import java.util.List;
 
@@ -33,4 +34,19 @@ public interface ProjectService extends IService<Project> {
      * @param role 赋予的角色 (2或3)
      */
     void inviteMember(Long projectId, Long currentUserId, String targetUsername, Integer role);
+
+    /**
+     * 获取项目成员列表
+     */
+    List<ProjectMemberVO> getProjectMembers(Long projectId);
+
+    /**
+     * 更新项目信息
+     */
+    void updateProject(Project project);
+
+    /**
+     * 删除项目 (同时清理关联的成员记录)
+     */
+    void deleteProject(Long id);
 }
