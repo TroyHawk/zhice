@@ -6,7 +6,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   ai:
     openai:
-      api-key: sk-a2d6d343a85f45c99deb74062b223100
+      api-key: {your-API-key}
       # 阿里云百炼
       base-url: https://dashscope.aliyuncs.com/compatible-mode
       chat:
