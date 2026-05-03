@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/zhice_db?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Singapore
-    username: root
-    password: lusini123
+    username: {username}
+    password: {password}
     driver-class-name: com.mysql.cj.jdbc.Driver
   ai:
     openai:
