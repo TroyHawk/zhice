@@ -1,12 +1,12 @@
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/zhice_db?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Singapore
-    username: root
-    password: lusini123
+    username: {username}
+    password: {password}
     driver-class-name: com.mysql.cj.jdbc.Driver
   ai:
     openai:
-      api-key: sk-a2d6d343a85f45c99deb74062b223100
+      api-key: {your-API-key}
       # 阿里云百炼
       base-url: https://dashscope.aliyuncs.com/compatible-mode
       chat:
