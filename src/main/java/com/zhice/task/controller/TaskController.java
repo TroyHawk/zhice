@@ -3,6 +3,7 @@ package com.zhice.task.controller;
 import com.zhice.common.api.Result; // 假设这是你统一定义的返回对象类名
 import com.zhice.task.dto.TaskCreateDTO;
 import com.zhice.task.dto.TaskStatusUpdateDTO;
+import com.zhice.task.dto.TaskUpdateDTO;
 import com.zhice.task.entity.Task;
 import com.zhice.task.service.TaskService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,4 +43,14 @@ public class TaskController {
         Map<String, List<Task>> board = taskService.getProjectBoard(projectId);
         return Result.success(board);
     }
+    @PutMapping("/{taskId}")
+    @Operation(summary = "更新任务详情", description = "修改右侧抽屉里的标题、描述、负责人等详细信息")
+    public Result<String> updateTaskDetails(
+            @PathVariable Long taskId,
+            @RequestBody TaskUpdateDTO dto) {
+        taskService.updateTaskDetails(taskId, dto);
+        return Result.success("任务详情更新成功");
+    }
+
+
 }

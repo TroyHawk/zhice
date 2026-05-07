@@ -22,4 +22,6 @@ public interface DocumentService {
 
     // 5. 将指定的草稿内容导出为 Word (修改原有导出方法)
     void exportDraftToWord(Long draftId, OutputStream outputStream);
+
+    List<ProjectDraft> listDraftsByProject(Long projectId);
 }

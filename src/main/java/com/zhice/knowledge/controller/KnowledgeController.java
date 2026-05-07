@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/knowledge")
@@ -34,5 +37,25 @@ public class KnowledgeController {
         KnowledgeDocument document = knowledgeDocumentService.uploadMaterial(file, projectId, currentUserId);
 
         return Result.success(document);
+    }
+
+    @GetMapping("/{projectId}")
+    @Operation(summary = "获取文档列表", description = "获取当前项目已上传的所有智库文档")
+    public Result<List<KnowledgeDocument>> getDocumentList(@PathVariable Long projectId) {
+        // 使用 MyBatis-Plus 的条件构造器查询该 projectId 下的文档
+        LambdaQueryWrapper<KnowledgeDocument> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(KnowledgeDocument::getProjectId, projectId)
+                .orderByDesc(KnowledgeDocument::getId); // 按 ID 倒序，新上传的在最上面
+
+        List<KnowledgeDocument> documentList = knowledgeDocumentService.list(wrapper);
+        return Result.success(documentList);
+    }
+
+    @DeleteMapping("/{projectId}/{documentId}")
+    @Operation(summary = "删除智库文档", description = "从数据库中删除文档记录")
+    public Result<String> deleteDocument(@PathVariable Long projectId, @PathVariable Long documentId) {
+        // 实际企业开发中，这里除了删数据库记录，还需要去 VectorStore (向量库) 和磁盘里删掉真实文件和向量
+        knowledgeDocumentService.removeById(documentId);
+        return Result.success("文档删除成功");
     }
 }

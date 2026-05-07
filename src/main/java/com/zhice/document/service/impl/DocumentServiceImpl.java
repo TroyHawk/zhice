@@ -9,6 +9,7 @@ import com.zhice.document.service.DocumentService;
 import com.zhice.project.entity.Project;
 import com.zhice.project.mapper.ProjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -130,4 +131,8 @@ public class DocumentServiceImpl implements DocumentService {
             throw new RuntimeException("Word 模板渲染失败");
         }
     }
+
+    public List<ProjectDraft> listDraftsByProject(Long projectId){
+        return draftMapper.selectDraftById(projectId);
+   }
 }

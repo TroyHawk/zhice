@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/documents")
@@ -60,5 +61,12 @@ public class DocumentController {
                 ex.printStackTrace();
             }
         }
+    }
+
+    @GetMapping("/projects/{projectId}/drafts")
+    @Operation(summary = "5. 获取项目草稿列表", description = "按时间倒序获取该项目的所有历史草稿")
+    public Result<List<ProjectDraft>> getDrafts(@PathVariable Long projectId) {
+        // 使用 LambdaQueryWrapper 进行查询
+        return Result.success(documentService.listDraftsByProject(projectId));
     }
 }

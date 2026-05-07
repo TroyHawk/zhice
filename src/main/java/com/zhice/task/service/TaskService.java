@@ -2,6 +2,7 @@ package com.zhice.task.service;
 
 import com.zhice.task.dto.TaskCreateDTO;
 import com.zhice.task.dto.TaskStatusUpdateDTO;
+import com.zhice.task.dto.TaskUpdateDTO;
 import com.zhice.task.entity.Task;
 
 import java.util.List;
@@ -24,4 +25,7 @@ public interface TaskService {
      * 返回按状态分组的字典，方便前端直接渲染各列
      */
     Map<String, List<Task>> getProjectBoard(Long projectId);
+
+    // 更新任务主信息
+    void updateTaskDetails(Long taskId, TaskUpdateDTO dto);
 }

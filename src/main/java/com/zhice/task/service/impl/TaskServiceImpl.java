@@ -1,9 +1,13 @@
 package com.zhice.task.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.zhice.common.context.UserContext;
+import com.zhice.project.entity.ProjectMember;
+import com.zhice.project.mapper.ProjectMemberMapper;
 import com.zhice.task.dto.TaskCreateDTO;
 import com.zhice.task.dto.TaskStatusUpdateDTO;
+import com.zhice.task.dto.TaskUpdateDTO;
 import com.zhice.task.entity.Task;
 import com.zhice.task.mapper.TaskMapper;
 import com.zhice.task.service.TaskService;
@@ -23,8 +27,23 @@ public class TaskServiceImpl implements TaskService {
     @Autowired
     private TaskMapper taskMapper;
 
+    @Autowired
+    private ProjectMemberMapper projectMemberMapper;
+
     @Override
     public void createTask(TaskCreateDTO dto) {
+        Long currentUserId = UserContext.getUserId();
+
+        // 1. 查询当前用户在本项目中的角色
+        ProjectMember memberRecord = projectMemberMapper.selectOne(
+                new LambdaQueryWrapper<ProjectMember>()
+                        .eq(ProjectMember::getProjectId, dto.getProjectId())
+                        .eq(ProjectMember::getUserId, currentUserId)
+        );
+        if (memberRecord == null) {
+            throw new RuntimeException("您不是该项目的成员，无法创建任务");
+        }
+
         Task task = new Task();
         // 将 DTO 里的同名字段拷贝到 Entity 中
         BeanUtils.copyProperties(dto, task);
@@ -33,7 +52,14 @@ public class TaskServiceImpl implements TaskService {
         task.setStatus(0);
         // 设置当前操作者为创建人
         task.setCreatorId(UserContext.getUserId() );
-
+        // 角色: 1-队长, 2-普通成员, 3-指导老师
+        if (memberRecord.getRole() == 2) {
+            // 如果是普通成员，强行指派给自己，无视前端传的 assigneeId
+            task.setAssigneeId(currentUserId);
+        } else {
+            // 队长或老师，使用前端传来的指派对象（如果没传，默认设为自己）
+            task.setAssigneeId(dto.getAssigneeId() != null ? dto.getAssigneeId() : currentUserId);
+        }
         taskMapper.insert(task);
     }
 
@@ -67,5 +93,21 @@ public class TaskServiceImpl implements TaskService {
         board.put("done", groupedTasks.getOrDefault(3, new ArrayList<>()));
 
         return board;
+    }
+    @Override
+    public void updateTaskDetails(Long taskId, TaskUpdateDTO dto) {
+        Task task = taskMapper.selectById(taskId);
+        if (task == null) {
+            throw new IllegalArgumentException("任务不存在");
+        }
+
+        // 只更新前端传过来的非空字段
+        if (dto.getTitle() != null) task.setTitle(dto.getTitle());
+        if (dto.getDescription() != null) task.setDescription(dto.getDescription());
+        if (dto.getPriority() != null) task.setPriority(dto.getPriority());
+        if (dto.getAssigneeId() != null) task.setAssigneeId(dto.getAssigneeId());
+        if (dto.getDeadline() != null) task.setDeadline(dto.getDeadline());
+
+        taskMapper.updateById(task);
     }
 }
