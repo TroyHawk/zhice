@@ -67,10 +67,10 @@ public class DocumentServiceImpl implements DocumentService {
                 【严格输出要求】：
                 你必须且只能输出一个合法的 JSON 对象，不要输出任何 Markdown 标记（如 ```json），不要包含任何解释性前言或后语。
                 你要输出的 JSON 对象必须严格包含以下 4 个 Key：
-                "background": "项目的研发背景和痛点分析（约150字）"
-                "innovation": "项目的3条核心创新点（分点作答，约150字）"
-                "architecture": "项目的技术架构或实现方案简述（约150字）"
-                "market": "市场前景与应用价值分析（约150字）"
+                "need_analysis": "本部分内容以300字以内为宜，简要说明为什么开发本作品，是否存在竞品，对标什么作品以及面向的用户、主要功能、主要性能等。如果存在竞品，建议有竞品分析表格，从多个维度分析本作品与竞品作品比较"
+                "outline_design": "将需求分析结果分解成功能模块以及模块的层次结构、调用关系、模块间接口以及人机界面等，（约600字）"
+                "detailed_design": "包括但不限于：界面设计、数据库设计(如果有)、关键算法。界面设计建议用作品实际界面，建议包括典型使用流程；数据库设计建议用表格、ER图或UML方式，说明文字简明扼要，违背范式的设计建议请说明理由；关键算法也可以替换为关键技术、技术创新等。本部分应大篇幅铺陈，突出重点痛点难点特点。"
+                "project_summary": "作品制作开发过程中的一些感悟和后续升级等，如：项目协调、任务分解、克服的困难、水平提升、升级演进、商业推广等诸方面。建议每个部分篇幅至少500字"
                 
                 【项目资料】：
                 """ + context;
@@ -122,7 +122,7 @@ public class DocumentServiceImpl implements DocumentService {
         }
 
         try {
-            XWPFTemplate template = XWPFTemplate.compile(new ClassPathResource("templates/4c_template.docx").getInputStream())
+            XWPFTemplate template = XWPFTemplate.compile(new ClassPathResource("templates/01-3 软件应用与开发类作品设计和开发文档模板（2026版）.docx").getInputStream())
                     .render(dataModel);
             template.write(outputStream);
             template.close();
